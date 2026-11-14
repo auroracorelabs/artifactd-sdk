@@ -1,0 +1,37 @@
+{
+  "name": "artifactd/client-feedback",
+  "version": "1.4.1",
+  "description": "Send user feedback, curated errors and crashes to Artifactd, tied to a released artifact version.",
+  "type": "library",
+  "require": {
+    "php": "^8.2",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ArtifactD\\ClientFeedback\\": "src/"
+    }
+  },
+  "scripts": {
+    "test": "php tests/client.php"
+  },
+  "archive": {
+    "exclude": [
+      "/tests/",
+      "/vendor/",
+      "/composer.lock",
+      "/dist/"
+    ]
+  },
+  "homepage": "https://github.com/auroracorelabs/artifactd-sdk",
+  "support": {
+    "source": "https://github.com/auroracorelabs/artifactd-sdk/tree/main/packages/php"
+  },
+  "license": "MIT",
+  "keywords": [
+    "artifactd",
+    "feedback",
+    "error-reporting"
+  ]
+}

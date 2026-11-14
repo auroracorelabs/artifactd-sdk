@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "SDK documentation [4322]",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/docs/site/serve.mjs",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "sdk-docs: build",
+      "env": {
+        "PORT": "4322"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Local: (https?://\\S+)",
+        "uriFormat": "%s"
+      }
+    }
+  ]
+}

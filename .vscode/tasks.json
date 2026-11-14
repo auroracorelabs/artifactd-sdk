@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "sdk-docs: build",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/docs/site/debug-build.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

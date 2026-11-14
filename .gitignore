@@ -1,0 +1,34 @@
+bin/
+obj/
+nupkgs/
+TestResults/
+coverage/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+node_modules/
+*.tgz
+target/
+
+# Local environment and credentials
+.agents/
+.aws/
+.codex/
+.env
+.env.*
+!.env.example
+NuGet.local.config
+NuGet.*.private.config
+*.user
+*.suo
+
+# Local report queues created by examples
+.artifactd-feedback/
+
+# Composer dependencies installed by PHP consumers and examples
+vendor/
+packages/php/composer.lock
+examples/php/composer.lock

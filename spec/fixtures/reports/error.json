@@ -1,0 +1,17 @@
+{
+  "report_id": "22222222-2222-4222-8222-222222222222",
+  "kind": "error",
+  "package_name": "my-app",
+  "version": "1.0.0",
+  "architecture": "amd64",
+  "format": "deb",
+  "runtime": ".NET 9.0",
+  "os": "linux",
+  "os_version": "Debian 13",
+  "occurred_at_utc": "2026-01-15T10:30:00Z",
+  "operation": "Save file",
+  "exception_type": "System.IO.IOException",
+  "message": "The file is in use by another process.",
+  "stack_trace": "System.IO.IOException: The file is in use by another process.\n   at MyApp.Program.Save()",
+  "source": "curated"
+}

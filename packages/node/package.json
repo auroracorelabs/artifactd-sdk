@@ -1,0 +1,44 @@
+{
+  "name": "@artifactd/client-feedback",
+  "version": "1.4.1",
+  "description": "Turn user feedback into your next release with Artifactd.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auroracorelabs/artifactd-sdk.git",
+    "directory": "packages/node"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "keywords": [
+    "artifactd",
+    "feedback",
+    "error-reporting",
+    "crash-reporting"
+  ],
+  "homepage": "https://github.com/auroracorelabs/artifactd-sdk/tree/main/packages/node#readme",
+  "bugs": {
+    "url": "https://github.com/auroracorelabs/artifactd-sdk/issues"
+  }
+}

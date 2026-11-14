@@ -1,0 +1,17 @@
+{
+  "report_id": "33333333-3333-4333-8333-333333333333",
+  "kind": "bugfix_request",
+  "package_name": "my-app",
+  "version": "1.0.0",
+  "architecture": "amd64",
+  "format": "deb",
+  "runtime": null,
+  "os": "linux",
+  "os_version": "Debian 13",
+  "occurred_at_utc": "2026-01-15T10:30:00Z",
+  "operation": "Export CSV",
+  "exception_type": null,
+  "message": "The last row is missing from the exported file.",
+  "stack_trace": null,
+  "source": "user"
+}
