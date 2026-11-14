@@ -35,7 +35,7 @@ jobs:
       - run: dotnet build ArtifactD.Sdk.slnx -c Release --no-restore -warnaserror
       - run: dotnet test packages/dotnet/ArtifactD.ClientFeedback.Tests -c Release --no-build --logger trx --results-directory TestResults
       - run: dotnet pack packages/dotnet/ArtifactD.ClientFeedback -c Release --no-restore -o nupkgs -p:Version="$PACKAGE_VERSION"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dotnet-packages
           path: nupkgs/
@@ -76,7 +76,7 @@ jobs:
         run: |
           python -m pip install packages/python/dist/*.whl
           python -c 'from artifactd_client_feedback import ClientFeedbackClient, Credentials'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.python == '3.13'
         with:
           name: python-packages
@@ -105,7 +105,7 @@ jobs:
           cd "$smoke"
           npm install "$root"/artifactd-client-feedback-*.tgz
           node --input-type=module -e "import { ClientFeedbackClient } from '@artifactd/client-feedback'; if (typeof ClientFeedbackClient !== 'function') process.exit(1)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.node == '24'
         with:
           name: node-packages
@@ -124,7 +124,7 @@ jobs:
       - run: cargo test --manifest-path packages/rust/Cargo.toml --locked
       - run: cargo check --manifest-path examples/rust/Cargo.toml
       - run: cargo package --manifest-path packages/rust/Cargo.toml --locked --allow-dirty
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: rust-packages
           path: packages/rust/target/package/*.crate
@@ -152,7 +152,7 @@ jobs:
       - run: php -l examples/php/feedback.php
       - run: python ci/package-php.py
       - run: bash ci/smoke-php.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.php == '8.5'
         with:
           name: php-packages
@@ -201,7 +201,7 @@ jobs:
       - name: Validate packages and generate checksums
         shell: bash
         run: python ci/collect-artifacts.py --input package-artifacts --output dist/sdk --version "$(tr -d '\r\n' < VERSION)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: client-feedback-packages
           path: dist/sdk/
