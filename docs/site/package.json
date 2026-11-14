@@ -12,7 +12,7 @@
     "dev": "node serve.mjs"
   },
   "dependencies": {
-    "marked": "17.0.0",
+    "marked": "18.2.0",
     "typedoc": "0.28.20",
     "typescript": "6.0.3"
   },
