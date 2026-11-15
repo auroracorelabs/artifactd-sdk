@@ -1,0 +1,18 @@
+{
+  "report_id": "16d67ec0-1e02-4fa8-b91c-fd278f29bf39",
+  "kind": "feature_request",
+  "package_name": "my-app",
+  "version": "2.0.0",
+  "architecture": "amd64",
+  "format": "deb",
+  "runtime": null,
+  "os": "linux",
+  "os_version": "Debian 13",
+  "occurred_at_utc": "2026-11-14T12:00:00Z",
+  "operation": "Export CSV",
+  "exception_type": null,
+  "message": "Let me take my data anywhere.",
+  "stack_trace": null,
+  "source": "user",
+  "ga4_client_id": "123.456"
+}

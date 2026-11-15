@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ArtifactD.ClientFeedback</RootNamespace>
+    <AssemblyName>ArtifactD.ClientFeedback</AssemblyName>
+    <PackageId>ArtifactD.ClientFeedback</PackageId>
+    <Description>Queue and upload crash, curated errors, user feedback, and best-effort usage events to Artifact Repository Manager, tied to a released artefact version.</Description>
+    <IsPackable>true</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>Aurora</Authors>
+    <Company>Aurora</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>artifactd;error-reporting;usage;feedback</PackageTags>
+    <Version Condition="'$(Version)' == ''">$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\..\..\VERSION').Trim())</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/auroracorelabs/artifactd-sdk-client</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/auroracorelabs/artifactd-sdk-client.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryBuild>true</PublishRepositoryBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.15" />
+    <PackageReference Include="System.Text.Json" Version="10.0.15" />
+    <PackageReference Include="System.Threading.Channels" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ArtifactD.ClientFeedback.Tests" />
+  </ItemGroup>
+
+</Project>

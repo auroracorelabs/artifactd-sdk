@@ -1,0 +1,259 @@
+name: SDK
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  dotnet:
+    needs: versions
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag_version="${GITHUB_REF_NAME#v}"
+            [[ "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+            [[ "$tag_version" == "$version" ]]
+          else
+            version="${version}-ci.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "PACKAGE_VERSION=$version" >> "$GITHUB_ENV"
+      - run: dotnet restore ArtifactD.Sdk.slnx
+      - run: dotnet build ArtifactD.Sdk.slnx -c Release --no-restore -warnaserror
+      - run: dotnet test packages/dotnet/ArtifactD.ClientFeedback.Tests -c Release --no-build --logger trx --results-directory TestResults
+      - run: dotnet pack packages/dotnet/ArtifactD.ClientFeedback -c Release --no-restore -o nupkgs -p:Version="$PACKAGE_VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-packages
+          path: nupkgs/
+          retention-days: 180
+          if-no-files-found: error
+  versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python ci/version.py --check
+      - name: License files match the root LICENSE
+        run: for p in node python rust php; do diff -q LICENSE packages/$p/LICENSE; done
+      - run: python -m unittest discover -s ci/tests
+      - name: Validate release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: test "${GITHUB_REF_NAME#v}" = "$(tr -d '\r\n' < VERSION)"
+  python:
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install build twine
+      - run: PYTHONPATH=packages/python/src python -m unittest discover -s packages/python/tests
+      - run: python -m py_compile examples/python/feedback.py
+      - run: python -m build packages/python
+      - run: python -m twine check packages/python/dist/*
+      - name: Smoke test installed wheel
+        run: |
+          python -m pip install packages/python/dist/*.whl
+          python -c 'from artifactd_client_feedback import ClientFeedbackClient, Credentials'
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.13'
+        with:
+          name: python-packages
+          path: packages/python/dist/
+          retention-days: 180
+          if-no-files-found: error
+  node:
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test --prefix packages/node
+      - run: node --check examples/node/feedback.mjs
+      - run: npm pack ./packages/node --pack-destination .
+      - name: Smoke test installed tarball
+        shell: bash
+        run: |
+          root="$PWD"
+          smoke="$(mktemp -d)"
+          cd "$smoke"
+          npm install "$root"/artifactd-client-feedback-*.tgz
+          node --input-type=module -e "import { ClientFeedbackClient } from '@artifactd/client-feedback'; if (typeof ClientFeedbackClient !== 'function') process.exit(1)"
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == '24'
+        with:
+          name: node-packages
+          path: '*.tgz'
+          retention-days: 180
+          if-no-files-found: error
+  rust:
+    needs: versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --manifest-path packages/rust/Cargo.toml --check
+      - run: cargo test --manifest-path packages/rust/Cargo.toml --locked
+      - run: cargo check --manifest-path examples/rust/Cargo.toml
+      - run: cargo package --manifest-path packages/rust/Cargo.toml --locked --allow-dirty
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rust-packages
+          path: packages/rust/target/package/*.crate
+          retention-days: 180
+          if-no-files-found: error
+  php:
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, json, zip
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: composer validate --no-check-publish packages/php/composer.json
+      - run: php packages/php/tests/client.php
+      - run: php -l examples/php/feedback.php
+      - run: python ci/package-php.py
+      - run: bash ci/smoke-php.sh
+      - uses: actions/upload-artifact@v4
+        if: matrix.php == '8.5'
+        with:
+          name: php-packages
+          path: packages/php/dist/*.zip
+          retention-days: 180
+          if-no-files-found: error
+  dotnet-framework:
+    needs: dotnet
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: dotnet-packages
+          path: nupkgs/
+      - name: Build and run a .NET Framework package consumer
+        shell: pwsh
+        run: |
+          $packages = @(Get-ChildItem nupkgs/ArtifactD.ClientFeedback.*.nupkg)
+          if ($packages.Count -ne 1) { throw 'Expected one NuGet package' }
+          $package = $packages[0]
+          $version = $package.BaseName.Substring('ArtifactD.ClientFeedback.'.Length)
+          $config = Join-Path $env:RUNNER_TEMP 'consumer-nuget.config'
+          @"
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="local" value="$PWD\nupkgs" />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+            </packageSources>
+          </configuration>
+          "@ | Set-Content -Path $config
+          dotnet restore packages/dotnet/compatibility/FrameworkConsumer.csproj --configfile $config -p:FeedbackPackageVersion=$version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build packages/dotnet/compatibility/FrameworkConsumer.csproj -c Release --no-restore -p:FeedbackPackageVersion=$version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & packages/dotnet/compatibility/bin/Release/net472/FrameworkConsumer.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  artifacts:
+    name: Assemble installable SDK packages
+    needs: [dotnet, dotnet-framework, python, node, rust, php]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-packages'
+          path: package-artifacts/
+          merge-multiple: false
+      - name: Validate packages and generate checksums
+        shell: bash
+        run: python ci/collect-artifacts.py --input package-artifacts --output dist/sdk --version "$(tr -d '\r\n' < VERSION)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-feedback-packages
+          path: dist/sdk/
+          retention-days: 180
+          if-no-files-found: error
+  release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: client-feedback-packages
+          path: release/
+      - name: Publish release with packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=$(find release -type f \( -name '*.nupkg' -o -name '*.snupkg' -o -name '*.whl' -o -name '*.tar.gz' -o -name '*.tgz' -o -name '*.crate' -o -name '*.zip' -o -name SHA256SUMS -o -name manifest.json \))
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" $files --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" $files --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
+          fi
+  publish:
+    name: Publish to package registries
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      language: all
+    secrets: inherit

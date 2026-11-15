@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: nuget
+    directory: /packages/dotnet/ArtifactD.ClientFeedback
+    schedule: {interval: weekly}
+  - package-ecosystem: cargo
+    directory: /packages/rust
+    schedule: {interval: weekly}
+  - package-ecosystem: npm
+    directory: /docs/site
+    schedule: {interval: weekly}
+  - package-ecosystem: pip
+    directory: /docs/site
+    schedule: {interval: weekly}
+  - package-ecosystem: composer
+    directory: /examples/php
+    schedule: {interval: weekly}

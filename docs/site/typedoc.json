@@ -1,0 +1,10 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../../packages/node/src/index.d.ts"],
+  "out": "../../build/docs-api/node",
+  "name": "Artifactd Client Feedback — Node.js / TypeScript",
+  "readme": "none",
+  "excludePrivate": true,
+  "disableSources": true,
+  "navigationLinks": {"SDK guides": "../../index.html", "GitHub": "https://github.com/auroracorelabs/artifactd-sdk-client"}
+}

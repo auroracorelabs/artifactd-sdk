@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "artifactd-client-feedback"
+version = "1.4.1"
+description = "Turn user feedback into your next release with Artifactd."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["artifactd", "feedback", "error-reporting"]
+requires-python = ">=3.10"
+authors = [{name = "Aurora"}]
+
+[project.urls]
+Homepage = "https://github.com/auroracorelabs/artifactd-sdk-client"
+Issues = "https://github.com/auroracorelabs/artifactd-sdk-client/issues"
+Repository = "https://github.com/auroracorelabs/artifactd-sdk-client"
+
+[tool.setuptools.packages.find]
+where = ["src"]
