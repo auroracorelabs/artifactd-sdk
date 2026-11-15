@@ -39,9 +39,8 @@ Versions of Node dependencies are locked in docs/site/package-lock.json. Python 
 
 ## Debug in VS Code
 
-Open the SDK repository, select **SDK documentation [8090]** under Run and Debug, and press F5. The pre-launch task installs documentation dependencies in a local Python virtual environment, generates all five API references and builds the site. VS Code then starts the preview and opens http://127.0.0.1:8090/artifactd-sdk-client/ in your browser. Stop debugging to stop the server.
+Open the SDK repository, select **sdk-client docs: preview [8090]** under Run and Debug, and press F5. The pre-launch task installs documentation dependencies in a local Python virtual environment, generates all five API references and builds the site. VS Code then starts the preview and opens http://127.0.0.1:8090/artifactd-sdk-client/ in your browser. Stop debugging to stop the server.
 
-The same launch configuration is available from the sibling Artifactd server checkout. Its **All documentation** compound starts both the developer documentation on port 8091 and SDK documentation on port 8090.
 
 After a build, you can also run the preview with `npm run dev --prefix docs/site` (runs `node docs/site/serve.ts`). Source edits require another build or restarting the debug configuration.
 

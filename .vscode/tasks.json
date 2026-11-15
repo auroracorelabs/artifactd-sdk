@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "sdk-docs: build",
+      "label": "sdk-client docs: build",
       "type": "process",
       "command": "bash",
       "args": [

@@ -9,8 +9,8 @@ if(!/^\/(?:[A-Za-z0-9._-]+\/)*$/.test(base))throw new Error('DOCS_BASE_PATH must
 const origin=process.env.DOCS_ORIGIN ?? 'https://auroracorelabs.github.io';
 const repo='https://github.com/auroracorelabs/artifactd-sdk-client';
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
-const esc=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-const url=route=>base+route.replace(/^\//,'');
+const esc=(s: string)=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+const url=(route: string)=>base+route.replace(/^\//,'');
 const entries=[
  ['','docs/site/content/index.md','Start'],['getting-started/','docs/site/content/getting-started.md','Start'],['delivery/','docs/site/content/delivery.md','Start'],
  ['dotnet/','packages/dotnet/README.md','Language guides'],
@@ -18,7 +18,8 @@ const entries=[
  ['php/','packages/php/README.md','Language guides'],
  ['protocol/','spec/README.md','Reference'],['releasing/','docs/RELEASING.md','Contributing'],['documentation/','docs/PAGES.md','Contributing'],
 ];
-const pages=await Promise.all(entries.map(async([route,source,group])=>({route,source,group,text:await readFile(path.join(root,source),'utf8')})));
+type Page={route:string,source:string,group:string,text:string,title?:string};
+const pages:Page[]=await Promise.all(entries.map(async([route,source,group])=>({route,source,group,text:await readFile(path.join(root,source),'utf8')})));
 const fence=String.fromCharCode(96).repeat(3);
 const rootReadme=await readFile(path.join(root,'README.md'),'utf8');
 const environmentTable=rootReadme.match(/\| Variable \| Value \|[\s\S]*?(?=\n\n)/)?.[0];
@@ -51,7 +52,7 @@ for(const [route,language,label,anchor] of languageExamples){
 for(const page of pages.filter(p=>['dotnet/','php/'].includes(p.route))){
  page.text=page.text.replace(/Download \*\*(?:dotnet-packages|php-packages)\*\*[^\n]*\n/, 'Install the package as described in [Install the SDK](/getting-started/#install-the-sdk).\n');
 }
-const exampleCommands={
+const exampleCommands: Record<string,string>={
  '.NET':'dotnet run --project packages/dotnet/samples/ArtifactD.ClientFeedback.Sample',
  'Python':'python -m pip install ./packages/python\npython examples/python/feedback.py',
  'Node.js':'npm install --prefix examples/node\nnode examples/node/feedback.mjs',
@@ -65,7 +66,7 @@ const examples=[
 let exampleText='# Runnable examples\n\nSet the environment variables in the [quick start](/getting-started/) and install your language package before running these examples. These are the actual source files in this repository, included on every documentation build.\n\n';
 for(const [label,language,file] of examples)exampleText+='## '+label+'\n\n[Source on GitHub]('+repo+'/blob/main/'+file+')\n\n'+fence+language+'\n'+await readFile(path.join(root,file),'utf8')+'\n'+fence+'\n\nRun from the repository checkout after setting the shared environment variables:\n\n'+fence+'sh\n'+exampleCommands[label]+'\n'+fence+'\n\n';
 pages.splice(3,0,{route:'examples/',source:'docs/site/content/examples.md',group:'Start',text:exampleText});
-const navigationTitles={
+const navigationTitles: Record<string,string>={
  '':'Overview','getting-started/':'Getting started','delivery/':'Queues and delivery','examples/':'Runnable examples',
  'dotnet/':'.NET','python/':'Python','node/':'Node.js / TypeScript','rust/':'Rust','php/':'PHP',
  'protocol/':'Protocol contract','releasing/':'Build and release','documentation/':'Documentation maintenance',
@@ -78,7 +79,7 @@ const references=[
  ['Rust API','reference/rust/artifactd_client_feedback/index.html'],
  ['PHP API','reference/php/index.html'],
 ];
-function resolveLink(href,page){
+function resolveLink(href: string,page: Page){
  if(/^(?:https?:|mailto:|data:|#)/.test(href))return href;
  if(href.startsWith('/'))return url(href);
  const hash=href.indexOf('#'),fragment=hash>=0?href.slice(hash):'',file=hash>=0?href.slice(0,hash):href;
@@ -93,7 +94,7 @@ for(const language of ['dotnet','python','node','php'])await cp(path.join(root,'
 await cp(path.join(root,'build/docs-rust/doc'),path.join(dist,'reference/rust'),{recursive:true});
 // DocFX's build manifest contains workstation paths and is not a serving asset.
 await rm(path.join(dist,'reference/dotnet/manifest.json'),{force:true});
-async function adjustReferenceLinks(directory) {
+async function adjustReferenceLinks(directory: string): Promise<void> {
  for(const entry of await readdir(directory,{withFileTypes:true})) {
   const file=path.join(directory,entry.name);
   if(entry.isDirectory())await adjustReferenceLinks(file);
@@ -108,7 +109,7 @@ async function adjustReferenceLinks(directory) {
 await adjustReferenceLinks(path.join(dist,'reference'));
 for(const [,file] of references)await access(path.join(dist,file));
 for(const page of pages){
- const toc=[],counts=new Map();
+ const toc: {depth:number,text:string,id:string}[]=[],counts=new Map<string,number>();
  const markdown=new Marked({gfm:true,renderer:{
   link({href,title,tokens}){return '<a href="'+esc(resolveLink(href,page))+'"'+(title?' title="'+esc(title)+'"':'')+'>'+this.parser.parseInline(tokens)+'</a>';},
   heading({tokens,depth}){
@@ -123,7 +124,7 @@ for(const page of pages){
  for(const group of [...new Set(pages.map(p=>p.group))])nav+='<section><p class="nav-label">'+group+'</p>'+pages.filter(p=>p.group===group).map(p=>'<a href="'+url(p.route)+'"'+(p===page?' aria-current="page"':'')+'>'+esc(navigationTitles[p.route]??p.title)+'</a>').join('')+'</section>';
  nav+='<section><p class="nav-label">Generated API</p>'+references.map(([title,route])=>'<a href="'+url(route)+'">'+title+' ↗</a>').join('')+'</section>';
  const brand='<img src="'+url('assets/favicon.svg')+'" width="36" height="36" alt=""><span>Artifact <span class="brand-product">Repository Manager</span></span><span class="badge">SDKs</span>';
- const html='<!doctype html><html lang="en" data-base="'+base+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1f2a"><title>'+esc(page.title)+' · Artifactd SDK</title><meta name="description" content="Artifactd Client Feedback SDK documentation: installation, examples and API references for .NET, Python, Node.js, Rust and PHP."><link rel="canonical" href="'+origin+url(page.route)+'"><link rel="icon" href="'+url('assets/favicon.svg')+'"><link rel="stylesheet" href="'+url('assets/docs.css')+'"><script>try{const t=localStorage.getItem("artifactd-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme:light)").matches?"light":"dark"}catch{}</script><script src="'+url('assets/docs.js')+'" defer></script></head><body><a class="skip" href="#content">Skip to content</a><header><a class="brand" href="'+base+'">'+brand+'</a><nav aria-label="Primary"><a href="https://docs.artifactd.net/">Server docs ↗</a><a href="'+repo+'">GitHub ↗</a></nav><a class="download" href="'+repo+'/actions/workflows/ci.yml">Packages</a><button class="menu-toggle" type="button" aria-label="Toggle documentation navigation" aria-controls="documentation-navigation" aria-expanded="false">☰</button><button class="theme" type="button" aria-label="Toggle color theme">◐</button></header><div class="layout"><aside class="sidebar" id="documentation-navigation"><div class="search"><label for="search">Search SDK documentation</label><input id="search" type="search" placeholder="Find a guide or example…" autocomplete="off"><div id="search-results" role="status" aria-live="polite" hidden></div></div><p class="nav-label">SDK version '+esc(version)+'</p><nav aria-label="Documentation">'+nav+'</nav></aside><main id="content"><div class="eyebrow">'+esc(page.group)+'</div><article>'+content+'</article><footer>Artifactd Client Feedback SDK '+esc(version)+' · <a href="'+(page.route==='examples/'?repo+'/tree/main/examples':repo+'/blob/main/'+page.source)+'">View source on GitHub</a></footer></main><aside class="toc"><p class="nav-label">On this page</p>'+toc.map(h=>'<a class="depth-'+h.depth+'" href="#'+h.id+'">'+esc(h.text)+'</a>').join('')+'</aside></div><footer class="site-footer"><div class="footer-grid"><div><a class="brand" href="'+base+'">'+brand+'</a><p>Client Feedback for .NET, Python, Node.js, Rust and PHP.</p></div><nav aria-label="Developer resources"><strong>Developers</strong><a href="https://docs.artifactd.net/api">REST API and OpenAPI</a><a href="https://docs.artifactd.net/ai">AI integration</a><a href="'+repo+'">SDK repository ↗</a></nav><nav aria-label="Product resources"><strong>Product</strong><a href="https://artifactd.net/">Official website ↗</a><a href="https://artifactd.net/download">Download Artifactd</a></nav></div><div class="copyright">© '+new Date().getFullYear()+' Aurora. All rights reserved.</div></footer></body></html>';
+ const html='<!doctype html><html lang="en" data-base="'+base+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1f2a"><title>'+esc(page.title??page.route)+' · Artifactd SDK</title><meta name="description" content="Artifactd Client Feedback SDK documentation: installation, examples and API references for .NET, Python, Node.js, Rust and PHP."><link rel="canonical" href="'+origin+url(page.route)+'"><link rel="icon" href="'+url('assets/favicon.svg')+'"><link rel="stylesheet" href="'+url('assets/docs.css')+'"><script>try{const t=localStorage.getItem("artifactd-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme:light)").matches?"light":"dark"}catch{}</script><script src="'+url('assets/docs.js')+'" defer></script></head><body><a class="skip" href="#content">Skip to content</a><header><a class="brand" href="'+base+'">'+brand+'</a><nav aria-label="Primary"><a href="https://docs.artifactd.net/">Server docs ↗</a><a href="'+repo+'">GitHub ↗</a></nav><a class="download" href="'+repo+'/actions/workflows/ci.yml">Packages</a><button class="menu-toggle" type="button" aria-label="Toggle documentation navigation" aria-controls="documentation-navigation" aria-expanded="false">☰</button><button class="theme" type="button" aria-label="Toggle color theme">◐</button></header><div class="layout"><aside class="sidebar" id="documentation-navigation"><div class="search"><label for="search">Search SDK documentation</label><input id="search" type="search" placeholder="Find a guide or example…" autocomplete="off"><div id="search-results" role="status" aria-live="polite" hidden></div></div><p class="nav-label">SDK version '+esc(version)+'</p><nav aria-label="Documentation">'+nav+'</nav></aside><main id="content"><div class="eyebrow">'+esc(page.group)+'</div><article>'+content+'</article><footer>Artifactd Client Feedback SDK '+esc(version)+' · <a href="'+(page.route==='examples/'?repo+'/tree/main/examples':repo+'/blob/main/'+page.source)+'">View source on GitHub</a></footer></main><aside class="toc"><p class="nav-label">On this page</p>'+toc.map(h=>'<a class="depth-'+h.depth+'" href="#'+h.id+'">'+esc(h.text)+'</a>').join('')+'</aside></div><footer class="site-footer"><div class="footer-grid"><div><a class="brand" href="'+base+'">'+brand+'</a><p>Client Feedback for .NET, Python, Node.js, Rust and PHP.</p></div><nav aria-label="Developer resources"><strong>Developers</strong><a href="https://docs.artifactd.net/api">REST API and OpenAPI</a><a href="https://docs.artifactd.net/ai">AI integration</a><a href="'+repo+'">SDK repository ↗</a></nav><nav aria-label="Product resources"><strong>Product</strong><a href="https://artifactd.net/">Official website ↗</a><a href="https://artifactd.net/download">Download Artifactd</a></nav></div><div class="copyright">© '+new Date().getFullYear()+' Aurora. All rights reserved.</div></footer></body></html>';
  const out=path.join(dist,page.route);await mkdir(out,{recursive:true});await writeFile(path.join(out,'index.html'),html);
 }
 // Preserve existing links while exposing one .NET guide in navigation and search.

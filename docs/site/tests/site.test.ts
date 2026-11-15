@@ -4,8 +4,8 @@ import {readFile,readdir,access,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const dist=fileURLToPath(new URL('../../../dist/docs/',import.meta.url)),base=process.env.DOCS_BASE_PATH??'/artifactd-sdk-client/';
-const read=p=>readFile(path.join(dist,p),'utf8');
-async function walk(dir){const files=[];for(const e of await readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())files.push(...await walk(p));else files.push(p);}return files;}
+const read=(p: string)=>readFile(path.join(dist,p),'utf8');
+async function walk(dir: string): Promise<string[]>{const files: string[]=[];for(const e of await readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())files.push(...await walk(p));else files.push(p);}return files;}
 test('all guides and generated language references are present',async()=>{
  for(const file of ['index.html','getting-started/index.html','dotnet/index.html','dotnet/integration/index.html','python/index.html','node/index.html','rust/index.html','php/index.html','reference/php/index.html','delivery/index.html','examples/index.html','protocol/index.html','releasing/index.html','reference/dotnet/ArtifactD.ClientFeedback.ClientFeedbackClient.html','reference/python/artifactd_client_feedback.html','reference/node/classes/ClientFeedbackClient.html','reference/rust/artifactd_client_feedback/struct.ClientFeedbackClient.html','.nojekyll'])await access(path.join(dist,file));
 });

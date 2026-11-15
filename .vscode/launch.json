@@ -2,12 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "SDK documentation [8090]",
+      "name": "sdk-client docs: preview [8090]",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/docs/site/serve.ts",
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "sdk-docs: build",
+      "preLaunchTask": "sdk-client docs: build",
       "env": {
         "PORT": "8090"
       },

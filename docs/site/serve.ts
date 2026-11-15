@@ -5,11 +5,11 @@ import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../dist/docs/',import.meta.url));
 const base=process.env.DOCS_BASE_PATH??'/artifactd-sdk-client/';
 if(!/^\/(?:[A-Za-z0-9._-]+\/)*$/.test(base))throw new Error('Invalid DOCS_BASE_PATH');
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.woff2':'font/woff2','.txt':'text/plain; charset=utf-8','.xml':'application/xml','.yml':'text/yaml; charset=utf-8'};
+const types: Record<string,string>={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.woff2':'font/woff2','.txt':'text/plain; charset=utf-8','.xml':'application/xml','.yml':'text/yaml; charset=utf-8'};
 const server=http.createServer(async(req,res)=>{
- if(!['GET','HEAD'].includes(req.method)){res.writeHead(405).end();return;}
+ if(!['GET','HEAD'].includes(req.method ?? '')){res.writeHead(405).end();return;}
  try{
-  const url=new URL(req.url,'http://localhost');
+  const url=new URL(req.url ?? '/','http://localhost');
   if(base!=='/'&&url.pathname==='/'){res.writeHead(302,{Location:base}).end();return;}
   if(!url.pathname.startsWith(base))throw new Error('Outside project path');
   let file=path.resolve(root,decodeURIComponent(url.pathname.slice(base.length)));
