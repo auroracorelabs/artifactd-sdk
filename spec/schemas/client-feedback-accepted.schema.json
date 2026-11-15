@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.artifactd.net/schemas/client-feedback-accepted.schema.json",
+  "title": "ClientFeedbackAccepted",
+  "type": "object",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "id_package_artifact": {
+      "type": "string",
+      "format": "uuid"
+    }
+  },
+  "required": [
+    "report_id",
+    "id_package_artifact"
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.artifactd.net/schemas/client-feedback-request.schema.json",
+  "title": "ClientFeedbackRequest",
+  "type": "object",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Nonempty UUID generated once per report. Preserve on retries."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "crash",
+        "error",
+        "bugfix_request",
+        "feature_request"
+      ],
+      "description": "Use operation and message for the title and description of user requests."
+    },
+    "package_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "architecture": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "amd64",
+        "arm64",
+        "all",
+        null
+      ]
+    },
+    "format": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "deb",
+        "arch",
+        "msi",
+        "msix",
+        "dmg",
+        "nuget",
+        null
+      ]
+    },
+    "occurred_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC event timestamp. If omitted, the server records its current time."
+    },
+    "operation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Operation or user request title. User requests require a nonblank title of at most 128 characters. Stored diagnostics are truncated to 128 characters."
+    },
+    "exception_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 256 characters."
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Exception message for crashes and errors; description for user requests (nonblank, at most 1024 characters). Stored diagnostics are truncated to 1024 characters."
+    },
+    "stack_trace": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 16000 characters."
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 64 characters."
+    },
+    "runtime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 128 characters."
+    },
+    "os": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 256 characters."
+    },
+    "os_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stored up to 128 characters."
+    },
+    "correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128,
+      "description": "Optional id shared by every system that handled the same request, so their reports can be joined. No whitespace or control characters; rejected with 400 when invalid."
+    },
+    "ga4_client_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "maxLength": 128,
+      "description": "Optional consented GA4 client id. Omit it when the user has not consented."
+    },
+    "session_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64",
+      "minimum": 1,
+      "description": "Optional application session start (Unix seconds)."
+    },
+    "engagement_time_msec": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64",
+      "minimum": 0,
+      "description": "Optional foreground time in milliseconds. Used with occurred_at_utc and session_id."
+    }
+  },
+  "required": [
+    "report_id",
+    "kind",
+    "package_name",
+    "version"
+  ],
+  "description": "Maximum UTF-8 JSON body: 65536 bytes. Architecture and format are required when release identity is ambiguous.",
+  "oneOf": [
+    {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "crash",
+            "error"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "operation"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "bugfix_request",
+            "feature_request"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "\\S"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "\\S"
+        }
+      }
+    }
+  ]
+}

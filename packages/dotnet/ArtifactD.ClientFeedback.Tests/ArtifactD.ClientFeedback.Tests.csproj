@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <None Include="../../../spec/fixtures/feature-request.json" Link="feature-request.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../../spec/conformance/*.json" Link="conformance/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../../spec/fixtures/**/*.json" Link="fixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.artifactd.net/schemas/error.schema.json",
+  "title": "Error",
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "error"
+  ]
+}

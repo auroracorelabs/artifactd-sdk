@@ -296,7 +296,8 @@ final class ClientFeedbackClient
         if ($count === false) {
             throw new \InvalidArgumentException('Text must be valid UTF-8.');
         }
-        return $count;
+        // The server counts UTF-16 code units (C# String.Length): characters outside the BMP cost two.
+        return $count + (int) preg_match_all('/[\x{10000}-\x{10FFFF}]/u', $value);
     }
 
     private static function truncate(string $value, int $limit): string

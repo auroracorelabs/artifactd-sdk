@@ -1,0 +1,15 @@
+{
+  "description": "How trackUsage / track_usage must treat each server answer to POST /v1/client-usage-event. Usage is best effort, never persisted and never retried: the call returns true only for a 2xx answer and never throws on a server or transport failure. SDKs without a result (.NET) must absorb every answer silently and send exactly once. Applies on Linux, Windows and macOS only. Usage is HTTPS-only, so an SDK test without a TLS server (Rust) can exercise only the transport failure.",
+  "cases": [
+    { "name": "accepted", "response": { "status": 204, "body": "" }, "expect": { "sent": true } },
+    { "name": "accepted with a body", "response": { "status": 200, "body": "{}" }, "expect": { "sent": true } },
+    { "name": "invalid body or unknown release", "response": { "status": 400, "body": "{\"error\":\"unknown release\"}" }, "expect": { "sent": false } },
+    { "name": "missing credentials", "response": { "status": 401, "body": "" }, "expect": { "sent": false } },
+    { "name": "unknown package or usage events switched off", "response": { "status": 404, "body": "" }, "expect": { "sent": false } },
+    { "name": "rate limited", "response": { "status": 429, "body": "", "headers": { "Retry-After": "30" } }, "expect": { "sent": false } },
+    { "name": "analytics upstream failed", "response": { "status": 502, "body": "" }, "expect": { "sent": false } },
+    { "name": "analytics upstream timed out", "response": { "status": 504, "body": "" }, "expect": { "sent": false } },
+    { "name": "redirect is not followed", "response": { "status": 302, "body": "", "headers": { "Location": "/elsewhere" } }, "expect": { "sent": false } },
+    { "name": "transport failure", "response": null, "expect": { "sent": false } }
+  ]
+}

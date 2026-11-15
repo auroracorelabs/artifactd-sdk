@@ -41,9 +41,9 @@ $tests['validation, Unicode, duplicate suppression and queue bounds'] = static f
     invalid(fn() => $client->reportFeatureRequest('', 'text'));
     invalid(fn() => $client->reportFeatureRequest('title', str_repeat('x', 1025)));
     invalid(fn() => $client->reportFeatureRequest(str_repeat('é', 129), 'text'));
-    $id = $client->reportFeatureRequest(str_repeat('é', 128), str_repeat('😀', 1024));
+    $id = $client->reportFeatureRequest(str_repeat('é', 128), str_repeat('😀', 512));
     check(is_string($id));
-    check($client->reportFeatureRequest(str_repeat('é', 128), str_repeat('😀', 1024)) === null);
+    check($client->reportFeatureRequest(str_repeat('é', 128), str_repeat('😀', 512)) === null);
     usleep(10000);
     $client->reportBugfixRequest('Save', 'Fails');
     $files = glob($temp . '/validation/*.pending.json');

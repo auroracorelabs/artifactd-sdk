@@ -126,4 +126,4 @@ jobs:
           version="$(tr -d '\r\n' < VERSION)"
           dotnet test packages/dotnet/ArtifactD.ClientFeedback.Tests -c Release
           dotnet pack packages/dotnet/ArtifactD.ClientFeedback -c Release -o nupkgs -p:Version="$version"
-          dotnet nuget push "nupkgs/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "nupkgs/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

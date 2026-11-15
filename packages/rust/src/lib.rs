@@ -264,8 +264,11 @@ impl ClientFeedbackClient {
             FeedbackKind::BugfixRequest | FeedbackKind::FeatureRequest
         );
         if request
-            && (operation.chars().count() > 128
-                || message.is_none_or(|m| m.trim().is_empty() || m.trim().chars().count() > 1024))
+            // The server counts UTF-16 code units of the trimmed value (C# String.Length).
+            && (operation.encode_utf16().count() > 128
+                || message.is_none_or(|m| {
+                    m.trim().is_empty() || m.trim().encode_utf16().count() > 1024
+                }))
         {
             return Err("title must be 1..128 and description 1..1024 characters".into());
         }

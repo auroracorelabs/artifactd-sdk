@@ -51,6 +51,11 @@ jobs:
         with:
           python-version: '3.13'
       - run: python ci/version.py --check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wire contract (fixtures against the JSON Schemas, invalid payloads rejected)
+        run: node spec/tools/check.mjs
       - name: License files match the root LICENSE
         run: for p in node python rust php; do diff -q LICENSE packages/$p/LICENSE; done
       - run: python -m unittest discover -s ci/tests
@@ -151,6 +156,7 @@ jobs:
           python-version: '3.13'
       - run: composer validate --no-check-publish packages/php/composer.json
       - run: php packages/php/tests/client.php
+      - run: php packages/php/tests/conformance.php
       - run: php -l examples/php/feedback.php
       - run: python ci/package-php.py
       - run: bash ci/smoke-php.sh

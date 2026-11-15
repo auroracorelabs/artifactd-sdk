@@ -50,6 +50,11 @@ def _identity(provider):
 
 
 CORRELATION_HEADER = "X-Correlation-Id"
+def _utf16_len(text: str) -> int:
+    """Length in UTF-16 code units, which is how the server counts title and description characters."""
+    return len(text.encode("utf-16-le")) // 2
+
+
 _CORRELATION_MAX = 128
 _ambient_correlation: contextvars.ContextVar[str | None] = contextvars.ContextVar("artifactd_correlation_id", default=None)
 
@@ -154,12 +159,12 @@ class ClientFeedbackClient:
         operation = operation.strip()
         if not operation:
             raise ValueError("operation/title is required")
-        if kind.endswith("_request") and (len(operation) > 128 or not message or not message.strip() or len(message.strip()) > 1024):
+        if kind.endswith("_request") and (_utf16_len(operation) > 128 or not message or not message.strip() or _utf16_len(message.strip()) > 1024):
             raise ValueError("title must be 1..128 and description 1..1024 characters")
         payload = dict(report_id=str(uuid.uuid4()), kind=kind, package_name=self.package_name,
                        version=self.version, architecture=self.architecture, format=self.format,
                        runtime=f"Python {platform.python_version()}", os={"darwin": "macos"}.get(platform.system().lower(), platform.system().lower()),
-                       os_version=platform.release(), occurred_at_utc=datetime.now(timezone.utc).isoformat(),
+                       os_version=platform.release(), occurred_at_utc=datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
                        operation=operation, exception_type=type(exception).__name__ if exception else None,
                        message=message.strip() if kind.endswith("_request") else (str(exception)[:1024] if exception else None),
                        stack_trace="".join(traceback.format_exception(exception))[:8000] if exception else None,

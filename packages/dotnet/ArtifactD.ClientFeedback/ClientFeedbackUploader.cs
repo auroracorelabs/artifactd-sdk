@@ -28,7 +28,11 @@ public sealed class ClientFeedbackUploader : IDisposable
         }
         else
         {
-            _httpClient = new HttpClient(new HttpClientHandler(), disposeHandler: true);
+            // Redirects are never followed (a redirect keeps the report queued and must not carry the credentials elsewhere).
+            _httpClient = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }, disposeHandler: true)
+            {
+                Timeout = TimeSpan.FromSeconds(15),
+            };
             _ownsHttpClient = true;
         }
     }

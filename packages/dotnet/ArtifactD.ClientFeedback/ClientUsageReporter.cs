@@ -45,7 +45,7 @@ public sealed class ClientUsageReporter : IDisposable
         }
         else
         {
-            _http = new HttpClient { Timeout = options.Timeout };
+            _http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }, disposeHandler: true) { Timeout = options.Timeout };
             _ownsHttpClient = true;
         }
 

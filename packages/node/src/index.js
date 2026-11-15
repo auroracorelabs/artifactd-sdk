@@ -75,7 +75,8 @@ export class ClientFeedbackClient {
     operation = required(operation, 'operation/title');
     if (kind.endsWith('_request')) {
       description = required(description, 'description');
-      if ([...operation].length > 128 || [...description].length > 1024) throw new RangeError('title/description exceed 128/1024 characters');
+      // The server counts UTF-16 code units of the trimmed value (C# String.Length), which is what String#length returns.
+      if (operation.length > 128 || description.length > 1024) throw new RangeError('title/description exceed 128/1024 characters');
     }
     const payload = {
       report_id: randomUUID(), kind, package_name: this.#options.packageName.trim(), version: this.#options.version.trim(),

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.artifactd.net/schemas/usage-event-request.schema.json",
+  "title": "UsageEventRequest",
+  "type": "object",
+  "properties": {
+    "package_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Catalogue package name of the application."
+    },
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "app_open",
+        "device_connection_start",
+        "update_check"
+      ]
+    },
+    "protocol": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "ssh",
+        "sftp",
+        "ipmi",
+        "proxmox",
+        "winbox",
+        null
+      ],
+      "description": "Required only for device_connection_start. Null or omitted for all other event names."
+    },
+    "client_id": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "maxLength": 128
+    },
+    "session_id": {
+      "type": "integer",
+      "format": "int64",
+      "minimum": 1,
+      "description": "Unix seconds, no later than server time plus 300 seconds."
+    },
+    "occurred_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC time of the event. With engagement_time_msec and session_id it is forwarded to analytics as the event time; ignored when out of range (more than 72 hours old or in the future)."
+    },
+    "engagement_time_msec": {
+      "type": "integer",
+      "format": "int64",
+      "minimum": 0,
+      "description": "Optional foreground time in milliseconds since the application session started. Sent with occurred_at_utc."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z.+-]+$",
+      "maxLength": 100
+    },
+    "architecture": {
+      "type": "string",
+      "enum": [
+        "amd64",
+        "arm64",
+        "all"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "deb",
+        "arch",
+        "msi",
+        "msix",
+        "dmg",
+        "nuget"
+      ]
+    },
+    "os": {
+      "type": "string",
+      "enum": [
+        "windows",
+        "linux",
+        "macos"
+      ]
+    }
+  },
+  "required": [
+    "package_name",
+    "event_name",
+    "client_id",
+    "session_id",
+    "version",
+    "architecture",
+    "format",
+    "os"
+  ],
+  "description": "Maximum JSON body: 4096 bytes."
+}

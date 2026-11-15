@@ -1,0 +1,21 @@
+{
+  "description": "How an SDK must treat each server answer to POST /v1/client-feedback. Every case queues one report, flushes once and checks the result and the queue. `response: null` is a transport failure (offline, DNS, TLS, timeout). A body is `body` (text) or `body_repeat` ([char, count]). `error` is read only from a JSON object body of at most 4096 bytes whose `error` member is a string; anything else yields null.",
+  "cases": [
+    { "name": "created", "response": { "status": 201, "body": "{\"report_id\":\"16d67ec0-1e02-4fa8-b91c-fd278f29bf39\",\"id_package_artifact\":\"0f3c1f64-9f0f-4f0e-9c58-1d4f5b2d6a11\"}" }, "expect": { "uploaded": true, "status_code": 201, "error": null, "retained": false } },
+    { "name": "already accepted report id", "response": { "status": 200, "body": "{}" }, "expect": { "uploaded": true, "status_code": 200, "error": null, "retained": false } },
+    { "name": "any other 2xx counts as delivered", "response": { "status": 202, "body": "" }, "expect": { "uploaded": true, "status_code": 202, "error": null, "retained": false } },
+    { "name": "204 without a body", "response": { "status": 204, "body": "" }, "expect": { "uploaded": true, "status_code": 204, "error": null, "retained": false } },
+    { "name": "redirect is not followed and keeps the report", "response": { "status": 302, "body": "", "headers": { "Location": "/created/v1/client-feedback" } }, "expect": { "uploaded": false, "status_code": 302, "error": null, "retained": true } },
+    { "name": "400 with a JSON error", "response": { "status": 400, "body": "{\"error\":\"No released artefact matches package_name and version.\"}" }, "expect": { "uploaded": false, "status_code": 400, "error": "No released artefact matches package_name and version.", "retained": true } },
+    { "name": "401 with an empty body", "response": { "status": 401, "body": "" }, "expect": { "uploaded": false, "status_code": 401, "error": null, "retained": true } },
+    { "name": "403 with a JSON error", "response": { "status": 403, "body": "{\"error\":\"access_denied\"}" }, "expect": { "uploaded": false, "status_code": 403, "error": "access_denied", "retained": true } },
+    { "name": "413 keeps the report", "response": { "status": 413, "body": "" }, "expect": { "uploaded": false, "status_code": 413, "error": null, "retained": true } },
+    { "name": "429 keeps the report (Retry-After is not interpreted)", "response": { "status": 429, "body": "", "headers": { "Retry-After": "30" } }, "expect": { "uploaded": false, "status_code": 429, "error": null, "retained": true } },
+    { "name": "500 keeps the report", "response": { "status": 500, "body": "boom" }, "expect": { "uploaded": false, "status_code": 500, "error": null, "retained": true } },
+    { "name": "503 with a JSON error", "response": { "status": 503, "body": "{\"error\":\"maintenance\"}" }, "expect": { "uploaded": false, "status_code": 503, "error": "maintenance", "retained": true } },
+    { "name": "error body that is not JSON", "response": { "status": 400, "body": "<html>bad gateway</html>" }, "expect": { "uploaded": false, "status_code": 400, "error": null, "retained": true } },
+    { "name": "error member that is not a string", "response": { "status": 400, "body": "{\"error\":{\"code\":7}}" }, "expect": { "uploaded": false, "status_code": 400, "error": null, "retained": true } },
+    { "name": "error body above 4096 bytes is ignored", "response": { "status": 403, "body_repeat": ["x", 16384] }, "expect": { "uploaded": false, "status_code": 403, "error": null, "retained": true } },
+    { "name": "transport failure", "response": null, "expect": { "uploaded": false, "status_code": null, "error": null, "retained": true } }
+  ]
+}

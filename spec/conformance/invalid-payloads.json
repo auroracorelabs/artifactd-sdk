@@ -1,0 +1,31 @@
+{
+  "description": "Mutations of a valid fixture that the wire schemas must reject. `set` overwrites keys, `unset` removes them. Checked by spec/tools/check.mjs; the server answers 400 for each of them.",
+  "cases": [
+    { "name": "unknown kind", "schema": "report", "base": "reports/crash.json", "set": { "kind": "warning" } },
+    { "name": "report_id is not a UUID", "schema": "report", "base": "reports/crash.json", "set": { "report_id": "not-a-uuid" } },
+    { "name": "report_id missing", "schema": "report", "base": "reports/crash.json", "unset": ["report_id"] },
+    { "name": "package_name empty", "schema": "report", "base": "reports/crash.json", "set": { "package_name": "" } },
+    { "name": "version missing", "schema": "report", "base": "reports/crash.json", "unset": ["version"] },
+    { "name": "unknown architecture", "schema": "report", "base": "reports/crash.json", "set": { "architecture": "x86" } },
+    { "name": "unknown format", "schema": "report", "base": "reports/crash.json", "set": { "format": "rpm" } },
+    { "name": "occurred_at_utc is not RFC 3339", "schema": "report", "base": "reports/crash.json", "set": { "occurred_at_utc": "yesterday" } },
+    { "name": "user request without title", "schema": "report", "base": "reports/feature-request.json", "unset": ["operation"] },
+    { "name": "user request with blank title", "schema": "report", "base": "reports/feature-request.json", "set": { "operation": "   " } },
+    { "name": "user request title of 129 characters", "schema": "report", "base": "reports/feature-request.json", "set": { "operation": { "repeat": ["a", 129] } } },
+    { "name": "user request with blank description", "schema": "report", "base": "reports/bugfix-request.json", "set": { "message": " " } },
+    { "name": "user request description of 1025 characters", "schema": "report", "base": "reports/bugfix-request.json", "set": { "message": { "repeat": ["a", 1025] } } },
+    { "name": "correlation_id of 129 characters", "schema": "report", "base": "reports/error.json", "set": { "correlation_id": { "repeat": ["a", 129] } } },
+    { "name": "ga4_client_id without a dot", "schema": "report", "base": "google/crash-with-ga4.json", "set": { "ga4_client_id": "123456" } },
+    { "name": "session_id below 1", "schema": "report", "base": "reports/error.json", "set": { "session_id": 0 } },
+    { "name": "negative engagement_time_msec", "schema": "report", "base": "reports/error.json", "set": { "engagement_time_msec": -1 } },
+    { "name": "usage event name outside the allow-list", "schema": "usage", "base": "usage/app-open.json", "set": { "event_name": "button_click" } },
+    { "name": "usage protocol outside the allow-list", "schema": "usage", "base": "usage/app-open.json", "set": { "event_name": "device_connection_start", "protocol": "telnet" } },
+    { "name": "usage client_id is not digits.digits", "schema": "usage", "base": "usage/app-open.json", "set": { "client_id": "abc" } },
+    { "name": "usage os outside the allow-list", "schema": "usage", "base": "usage/app-open.json", "set": { "os": "freebsd" } },
+    { "name": "usage architecture missing", "schema": "usage", "base": "usage/app-open.json", "unset": ["architecture"] },
+    { "name": "usage format missing", "schema": "usage", "base": "usage/app-open.json", "unset": ["format"] },
+    { "name": "usage session_id missing", "schema": "usage", "base": "usage/app-open.json", "unset": ["session_id"] },
+    { "name": "usage version with a space", "schema": "usage", "base": "usage/app-open.json", "set": { "version": "1.0 beta" } },
+    { "name": "usage negative engagement_time_msec", "schema": "usage", "base": "usage/app-open.json", "set": { "engagement_time_msec": -5 } }
+  ]
+}

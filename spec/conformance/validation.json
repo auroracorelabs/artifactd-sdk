@@ -1,0 +1,58 @@
+{
+  "description": "Input rules every SDK enforces before anything is queued. A value is a string, {\"repeat\": [text, count]} or {\"concat\": [values...]}. Lengths are UTF-16 code units of the trimmed value, because that is how the server counts (C# String.Length after Trim): an emoji costs 2. An invalid user request throws (argument/validation error) and writes nothing to the queue.",
+  "user_requests": [
+    { "name": "one character each", "title": "T", "description": "D", "valid": true },
+    { "name": "limits: 128 and 1024", "title": { "repeat": ["a", 128] }, "description": { "repeat": ["b", 1024] }, "valid": true },
+    { "name": "title of 129", "title": { "repeat": ["a", 129] }, "description": "ok", "valid": false },
+    { "name": "description of 1025", "title": "ok", "description": { "repeat": ["b", 1025] }, "valid": false },
+    { "name": "empty title", "title": "", "description": "ok", "valid": false },
+    { "name": "blank title", "title": "   ", "description": "ok", "valid": false },
+    { "name": "empty description", "title": "ok", "description": "", "valid": false },
+    { "name": "blank description", "title": "ok", "description": " \t ", "valid": false },
+    { "name": "limits are measured after trimming", "title": { "concat": ["  ", { "repeat": ["a", 128] }, "  "] }, "description": { "concat": [" ", { "repeat": ["b", 1024] }, " "] }, "valid": true },
+    { "name": "title of 128 UTF-16 units made of emoji", "title": { "repeat": ["😀", 64] }, "description": { "repeat": ["😀", 512] }, "valid": true },
+    { "name": "title of 130 UTF-16 units made of emoji", "title": { "repeat": ["😀", 65] }, "description": "ok", "valid": false },
+    { "name": "description of 1026 UTF-16 units made of emoji", "title": "ok", "description": { "repeat": ["😀", 513] }, "valid": false },
+    { "name": "accents count once", "title": { "repeat": ["é", 128] }, "description": { "repeat": ["é", 1024] }, "valid": true }
+  ],
+  "correlation_ids": {
+    "description": "Passed explicitly to reportError. A valid id is sent as the trimmed value; an invalid explicit id is an error and nothing is queued.",
+    "valid": [
+      { "name": "plain", "value": "req-1", "sent": "req-1" },
+      { "name": "128 characters", "value": { "repeat": ["a", 128] }, "sent": { "repeat": ["a", 128] } },
+      { "name": "surrounding whitespace is trimmed", "value": "  abc  ", "sent": "abc" },
+      { "name": "uuid", "value": "7b0c6a1e-5b0e-4a63-9f3a-0d1c2e3f4a5b", "sent": "7b0c6a1e-5b0e-4a63-9f3a-0d1c2e3f4a5b" }
+    ],
+    "invalid": [
+      { "name": "129 characters", "value": { "repeat": ["a", 129] } },
+      { "name": "inner space", "value": "a b" },
+      { "name": "tab", "value": "a\tb" },
+      { "name": "newline", "value": "a\nb" },
+      { "name": "control character", "value": "a\u0001b" },
+      { "name": "blank", "value": "   " }
+    ]
+  },
+  "ga4_client_ids": {
+    "description": "Value returned by the identity provider. Anything that does not match [0-9]+.[0-9]+ (max 128 characters), or a provider that throws, means no identity: the ga4_client_id key is omitted.",
+    "accepted": [
+      { "name": "digits.digits", "value": "123.456" },
+      { "name": "long but valid", "value": { "concat": [{ "repeat": ["1", 60] }, ".", { "repeat": ["2", 60] }] } }
+    ],
+    "omitted": [
+      { "name": "no dot", "value": "123456" },
+      { "name": "letters", "value": "abc.def" },
+      { "name": "two dots", "value": "1.2.3" },
+      { "name": "empty", "value": "" },
+      { "name": "129 characters", "value": { "concat": [{ "repeat": ["1", 64] }, ".", { "repeat": ["2", 64] }] } },
+      { "name": "leading space", "value": " 1.2" },
+      { "name": "trailing newline", "value": "1.2\n" },
+      { "name": "provider throws", "throws": true }
+    ]
+  },
+  "diagnostics": {
+    "description": "reportError / reportCrash truncate rather than reject: message to 1024 and stack_trace to 8000 characters (the server stores up to 16000). The whole report must stay within 65536 UTF-8 bytes or the call is rejected.",
+    "message_limit": 1024,
+    "stack_trace_limit": 8000,
+    "report_byte_limit": 65536
+  }
+}
