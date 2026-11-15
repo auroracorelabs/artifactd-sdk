@@ -1,5 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
+  "tsconfig": "tsconfig.typedoc.json",
   "entryPoints": ["../../packages/node/src/index.d.ts"],
   "out": "../../build/docs-api/node",
   "name": "Artifactd Client Feedback — Node.js / TypeScript",
