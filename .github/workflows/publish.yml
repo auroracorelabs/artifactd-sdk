@@ -47,8 +47,8 @@ jobs:
         shell: bash
         run: |
           if [ -z "$TWINE_PASSWORD" ]; then
-            echo "::warning::PYPI_TOKEN is not configured; skipping PyPI"
-            [ "${{ inputs.language }}" = all ] && exit 0 || exit 1
+            echo "::error::PYPI_TOKEN is not configured; cannot publish to PyPI"
+            exit 1
           fi
           PYTHONPATH=packages/python/src python -m unittest discover -s packages/python/tests
           python -m pip install build twine
@@ -72,8 +72,8 @@ jobs:
         shell: bash
         run: |
           if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::warning::NPM_TOKEN is not configured; skipping npm"
-            [ "${{ inputs.language }}" = all ] && exit 0 || exit 1
+            echo "::error::NPM_TOKEN is not configured; cannot publish to npm"
+            exit 1
           fi
           npm test --prefix packages/node
           npm publish ./packages/node --access public
@@ -91,8 +91,8 @@ jobs:
         shell: bash
         run: |
           if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
-            echo "::warning::CARGO_REGISTRY_TOKEN is not configured; skipping crates.io"
-            [ "${{ inputs.language }}" = all ] && exit 0 || exit 1
+            echo "::error::CARGO_REGISTRY_TOKEN is not configured; cannot publish to crates.io"
+            exit 1
           fi
           cargo test --manifest-path packages/rust/Cargo.toml --locked
           cargo publish --manifest-path packages/rust/Cargo.toml --locked
