@@ -53,9 +53,9 @@ jobs:
       - run: python ci/version.py --check
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
       - name: Wire contract (fixtures against the JSON Schemas, invalid payloads rejected)
-        run: node spec/tools/check.mjs
+        run: node spec/tools/check.ts
       - name: License files match the root LICENSE
         run: for p in node python rust php; do diff -q LICENSE packages/$p/LICENSE; done
       - run: python -m unittest discover -s ci/tests

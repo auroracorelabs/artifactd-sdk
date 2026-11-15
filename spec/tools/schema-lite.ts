@@ -3,14 +3,27 @@
 // uuid / date-time formats. Returns a list of human-readable errors (empty when valid).
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/i;
-const typeOf = v => v === null ? 'null' : Array.isArray(v) ? 'array' : Number.isInteger(v) ? 'integer' : typeof v;
-const matches = (type, value) => type === 'number' ? typeof value === 'number' : typeOf(value) === type;
+type Schema = {
+  type?: string | string[];
+  enum?: unknown[];
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  format?: string;
+  minimum?: number;
+  required?: string[];
+  properties?: Record<string, Schema>;
+  oneOf?: Schema[];
+};
+const typeOf = (v: unknown) => v === null ? 'null' : Array.isArray(v) ? 'array' : Number.isInteger(v) ? 'integer' : typeof v;
+const matches = (type: string, value: unknown) => type === 'number' ? typeof value === 'number' : typeOf(value) === type;
 
-export function validate(schema, value, path = '$') {
-  const errors = [];
+export type { Schema };
+export function validate(schema: Schema, value: unknown, path = '$'): string[] {
+  const errors: string[] = [];
   if (schema.type) {
-    const types = [].concat(schema.type);
-    if (!types.some(t => matches(t, value))) return [`${path}: expected ${types.join('|')}, got ${typeOf(value)}`];
+    const types = typeof schema.type === 'string' ? [schema.type] : schema.type;
+    if (!types.some((t) => matches(t, value))) return [`${path}: expected ${types.join('|')}, got ${typeOf(value)}`];
   }
   if (schema.enum && !schema.enum.includes(value)) errors.push(`${path}: ${JSON.stringify(value)} is not one of ${JSON.stringify(schema.enum)}`);
   if (typeof value === 'string') {
@@ -23,11 +36,12 @@ export function validate(schema, value, path = '$') {
   }
   if (typeof value === 'number' && schema.minimum !== undefined && value < schema.minimum) errors.push(`${path}: below ${schema.minimum}`);
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    for (const name of schema.required ?? []) if (!(name in value)) errors.push(`${path}: missing required property ${name}`);
-    for (const [name, sub] of Object.entries(schema.properties ?? {})) if (name in value) errors.push(...validate(sub, value[name], `${path}.${name}`));
+    const record = value as Record<string, unknown>;
+    for (const name of schema.required ?? []) if (!(name in record)) errors.push(`${path}: missing required property ${name}`);
+    for (const [name, sub] of Object.entries(schema.properties ?? {})) if (name in record) errors.push(...validate(sub, record[name], `${path}.${name}`));
   }
   if (schema.oneOf) {
-    const passing = schema.oneOf.filter(branch => validate({ ...branch, type: undefined }, value, path).length === 0);
+    const passing = schema.oneOf.filter((branch) => validate({ ...branch, type: undefined }, value, path).length === 0);
     if (passing.length !== 1) errors.push(`${path}: matches ${passing.length} of ${schema.oneOf.length} oneOf branches`);
   }
   return errors;

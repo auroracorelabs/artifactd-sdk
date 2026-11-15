@@ -2,7 +2,7 @@
 
 All notable changes to the Artifactd SDKs. Versions are shared across all languages.
 
-## Unreleased
+## 1.5.0 — 2026-11-15
 
 - Contract: `spec/schemas` (JSON Schema derived from the published OpenAPI document), shared conformance tables in `spec/conformance` (server answers, input validation, usage answers) executed by all five test suites, and `node spec/tools/check.mjs` to validate fixtures against the schemas.
 - Title and description limits (128 / 1024) now count UTF-16 code units of the trimmed value, exactly as the server does. Node, Python, Rust and PHP previously counted Unicode code points and could queue an emoji-heavy request the server answers with 400 forever.

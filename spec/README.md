@@ -10,11 +10,11 @@ All SDKs speak the existing Artifactd dataplane protocol. Branding does not rena
 | Rules in prose | this file | Everything the tables cannot express: queue format, retry, deduplication, legacy fields. |
 
 ```sh
-node spec/tools/check.mjs              # fixtures satisfy the schemas, invalid payloads are rejected, schemas match OpenAPI
-node spec/tools/sync-schemas.mjs       # regenerate spec/schemas after the OpenAPI document changed
+node spec/tools/check.ts              # fixtures satisfy the schemas, invalid payloads are rejected, schemas match OpenAPI
+node spec/tools/sync-schemas.ts       # regenerate spec/schemas after the OpenAPI document changed
 ```
 
-`check.mjs` compares `schemas/` with the OpenAPI document only when the `docs.artifactd.net` checkout sits next to this repository (or `ARTIFACTD_OPENAPI` points to it); otherwise that comparison is skipped.
+`check.ts` compares `schemas/` with the OpenAPI document only when the `docs.artifactd.net` checkout sits next to this repository (or `ARTIFACTD_OPENAPI` points to it); otherwise that comparison is skipped.
 
 ## Endpoints
 
@@ -61,7 +61,7 @@ Usage is best effort, never persisted and never retried. Events: `app_open`, `up
 - `upload-responses.json`: server answer to a queued report -> `uploaded`, `status_code`, `error`, whether the file stays queued.
 - `usage-responses.json`: server answer to a usage event -> `sent`. Rust can only exercise the transport failure (no TLS server in tests) and .NET, which is fire-and-forget, only checks that every answer is absorbed and sent once.
 - `validation.json`: title/description limits (including trimming and UTF-16 counting), explicit correlation ids, GA4 identities and diagnostic truncation.
-- `invalid-payloads.json`: mutations the wire schemas must reject; checked by `node spec/tools/check.mjs` rather than by the SDKs.
+- `invalid-payloads.json`: mutations the wire schemas must reject; checked by `node spec/tools/check.ts` rather than by the SDKs.
 
 Values may be written as `{"repeat": [text, count]}` or `{"concat": [...]}` to keep the files small.
 
@@ -69,7 +69,7 @@ Values may be written as `{"repeat": [text, count]}` or `{"concat": [...]}` to k
 
 1. Implement the rules above; the table descriptions say what each case means.
 2. Load `conformance/*.json` and the fixtures from your test suite, like `packages/node/test/conformance.test.js`.
-3. Run `node spec/tools/check.mjs` after any change to schemas, fixtures or tables.
+3. Run `node spec/tools/check.ts` after any change to schemas, fixtures or tables.
 
 ## SDK-specific behavior
 

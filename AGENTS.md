@@ -12,8 +12,8 @@ This repository is **public on GitHub**. Treat every commit, issue, pull request
 ## External-facing content only
 
 - Documentation, README text, examples, and commit messages must stand alone for public readers.
-- Do not reference internal Aurora GitLab projects, the shared `pipeline` repository, or other private infrastructure unless the task is explicitly to remove such references.
-- Use generic public URLs (for example `https://docs.artifactd.net/`, `https://github.com/artifactd/artifactd-sdk-client`) in examples.
+- Do not reference private repositories, internal CI systems, or other non-public infrastructure; point to public documentation instead.
+- Use generic public URLs (for example `https://docs.artifactd.net/`, `https://github.com/auroracorelabs/artifactd-sdk-client`) in examples.
 
 ## CI and release
 
