@@ -2,5 +2,5 @@
   "name": "artifactd/client-feedback-example",
   "type": "project",
   "repositories": [{"type": "path", "url": "../../packages/php", "options": {"symlink": false}}],
-  "require": {"artifactd/client-feedback": "1.5.0"}
+  "require": {"artifactd/client-feedback": "1.5.1"}
 }

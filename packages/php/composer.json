@@ -1,6 +1,6 @@
 {
   "name": "artifactd/client-feedback",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Send user feedback, curated errors and crashes to Artifactd, tied to a released artifact version.",
   "type": "library",
   "require": {

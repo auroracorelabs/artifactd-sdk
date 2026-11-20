@@ -2,6 +2,10 @@
 
 All notable changes to the Artifactd SDKs. Versions are shared across all languages.
 
+## 1.5.1 — 2026-11-20
+
+- Release pipeline: npm publishing runs `npm whoami` before publishing to show which account the registry token belongs to. No SDK code change.
+
 ## 1.5.0 — 2026-11-15
 
 - Contract: `spec/schemas` (JSON Schema derived from the published OpenAPI document), shared conformance tables in `spec/conformance` (server answers, input validation, usage answers) executed by all five test suites, and `node spec/tools/check.mjs` to validate fixtures against the schemas.
