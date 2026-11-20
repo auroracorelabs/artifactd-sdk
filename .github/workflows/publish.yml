@@ -68,6 +68,8 @@ jobs:
         with:
           node-version: '24'
           registry-url: https://registry.npmjs.org
+      - name: Show npm identity
+        run: npm whoami
       - name: Publish to npm
         shell: bash
         run: |
