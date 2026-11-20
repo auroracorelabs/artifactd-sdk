@@ -4,7 +4,7 @@ All notable changes to the Artifactd SDKs. Versions are shared across all langua
 
 ## 1.5.1 — 2026-11-20
 
-- Release pipeline: npm publishing runs `npm whoami` before publishing to show which account the registry token belongs to. No SDK code change.
+- Release pipeline fixes only. No SDK code change.
 
 ## 1.5.0 — 2026-11-15
 
