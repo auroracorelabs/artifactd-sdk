@@ -41,7 +41,7 @@ jobs:
           DOCS_ORIGIN: https://${{ github.repository_owner }}.github.io
         run: npm run build --prefix docs/site
       - run: npm test --prefix docs/site
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/docs
   deploy:
